@@ -1,3 +1,5 @@
+package workspace.task.properties;
+
 public class Status {
     private Integer id;
     private String title;

@@ -1,3 +1,7 @@
+package auth;
+
+import workspace.Workspace;
+
 import java.util.ArrayList;
 import java.util.List;
 

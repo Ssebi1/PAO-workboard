@@ -1,3 +1,5 @@
+package workspace.task.properties;
+
 public class Tag {
     private Integer id;
     private String title;

@@ -1,3 +1,10 @@
+package workspace;
+
+import workspace.task.Task;
+import workspace.task.properties.CustomField;
+import workspace.task.properties.Status;
+import workspace.task.properties.Tag;
+
 import java.util.ArrayList;
 import java.util.List;
 

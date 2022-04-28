@@ -1,3 +1,5 @@
+package workspace.task.properties;
+
 import java.util.Date;
 
 public class Comment {

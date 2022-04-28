@@ -1,3 +1,5 @@
+package workspace.task.properties;
+
 public class CustomField {
     private Integer id;
     private String title;

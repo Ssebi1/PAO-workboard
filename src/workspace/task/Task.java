@@ -1,3 +1,10 @@
+package workspace.task;
+
+import workspace.task.properties.Comment;
+import workspace.task.properties.CustomField;
+import workspace.task.properties.Status;
+import workspace.task.properties.Tag;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
