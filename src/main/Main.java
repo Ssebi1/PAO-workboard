@@ -1,6 +1,8 @@
 package main;
 
 import console.Outputs;
+import csv.audit.AuditSingleton;
+import csv.readWriteSingletons.UsersReadWriteSingleton;
 import data.Data;
 import services.Services;
 
@@ -11,6 +13,9 @@ public class Main {
         Data data = new Data();
         Services services = new Services(data);
         Scanner scanner = new Scanner(System.in);
+
+        data.setUsers(UsersReadWriteSingleton.getInstance().readDataFromFile());
+        AuditSingleton.getInstance().addActionToFile("\nstart program");
 
         while (true) {
             if (data.getCurrentUserLogged() == -1) {
@@ -39,6 +44,7 @@ public class Main {
                     }
                     default -> {
                         System.out.println("Bye!");
+                        AuditSingleton.getInstance().addActionToFile("end program");
                         return;
                     }
                 }
@@ -106,6 +112,7 @@ public class Main {
                     }
                     default -> {
                         System.out.println("Bye!");
+                        AuditSingleton.getInstance().addActionToFile("end program");
                         return;
                     }
                 }

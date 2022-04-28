@@ -1,6 +1,8 @@
 package services;
 
 import auth.User;
+import csv.audit.AuditSingleton;
+import csv.readWriteSingletons.UsersReadWriteSingleton;
 import data.Data;
 import workspace.Workspace;
 import workspace.task.Subtask;
@@ -26,6 +28,7 @@ public class Services {
             if (Objects.equals(user.getEmail(), email) && Objects.equals(user.getPassword(), password)) {
                 data.setCurrentUserLogged(user.getId());
                 System.out.println("Logged in succesfully.");
+                AuditSingleton.getInstance().addActionToFile("login");
                 return;
             }
         }
@@ -49,8 +52,11 @@ public class Services {
                 latestId = user.getId();
             }
         }
-        data.addUser(new User(latestId, email, username, password));
+        User newUser = new User(latestId + 1, email, username, password);
+        data.addUser(newUser);
+        UsersReadWriteSingleton.getInstance().writeDataToFile(newUser);
         System.out.println("User created. Please log in.");
+        AuditSingleton.getInstance().addActionToFile("register");
     }
 
     public void logout() {
@@ -60,6 +66,7 @@ public class Services {
         }
         data.setCurrentUserLogged(-1);
         System.out.println("Logged out succesfully.");
+        AuditSingleton.getInstance().addActionToFile("logout");
     }
 
     public void account() {
@@ -71,6 +78,7 @@ public class Services {
         for (User user : data.getUsers()) {
             if (Objects.equals(user.getId(), data.getCurrentUserLogged())) {
                 System.out.println("Logged in as " + user.getUsername() + " with the email " + user.getEmail());
+                AuditSingleton.getInstance().addActionToFile("account info");
                 return;
             }
         }
@@ -97,10 +105,11 @@ public class Services {
             }
         }
 
-        workspaces.add(new Workspace(latestId, title));
+        workspaces.add(new Workspace(latestId + 1, title));
         user.setWorkspaces(workspaces);
         data.updateCurrentLoggedUser(user);
         System.out.println("Workspace " + title + " created.");
+        AuditSingleton.getInstance().addActionToFile("create workspace");
     }
 
     public void listWorkspaces() {
@@ -113,6 +122,7 @@ public class Services {
         for (Workspace workspace : user.getWorkspaces()) {
             System.out.println("workspace-" + workspace.getTitle());
         }
+        AuditSingleton.getInstance().addActionToFile("list workspaces");
     }
 
     public void deleteWorkspace(String title) {
@@ -126,6 +136,7 @@ public class Services {
         workspaces.removeIf(workspace -> Objects.equals(workspace.getTitle(), title));
         user.setWorkspaces(workspaces);
         System.out.println("Workspace deleted.");
+        AuditSingleton.getInstance().addActionToFile("delete workspace");
     }
 
     public void renameWorkspace(String oldTitle, String newTitle) {
@@ -146,6 +157,7 @@ public class Services {
                 }
                 workspace.setTitle(newTitle);
                 System.out.println("Workspace title updated from '" + oldTitle + "' to '" + newTitle + "'");
+                AuditSingleton.getInstance().addActionToFile("rename workspace");
             }
         }
     }
@@ -181,7 +193,7 @@ public class Services {
         }
 
         List<Task> tasks = workspace.getTasks();
-        tasks.add(new Task(latestId, title) {
+        tasks.add(new Task(latestId + 1, title) {
             @Override
             public Integer getParentTaskId() {
                 return null;
@@ -194,6 +206,7 @@ public class Services {
         });
         workspace.setTasks(tasks);
         System.out.println("Task '" + title + "' created.");
+        AuditSingleton.getInstance().addActionToFile("create task");
     }
 
     public void deleteTask(String workspaceTitle, String title) {
@@ -219,6 +232,7 @@ public class Services {
         tasks.removeIf(task -> Objects.equals(task.getTitle(), title));
         workspace.setTasks(tasks);
         System.out.println("Task '" + title + "' deleted.");
+        AuditSingleton.getInstance().addActionToFile("delete task");
     }
 
     public void listTasks(String workspaceTitle) {
@@ -245,6 +259,7 @@ public class Services {
                 System.out.println(task.getTitle());
             }
         }
+        AuditSingleton.getInstance().addActionToFile("list tasks");
     }
 
     public void createSubtask(String workspaceTitle, String parentTaskTitle, String title) {
@@ -287,9 +302,10 @@ public class Services {
         }
 
         List<Task> tasks = workspace.getTasks();
-        tasks.add(new Subtask(parentTaskId, latestId, title));
+        tasks.add(new Subtask(parentTaskId, latestId + 1, title));
         workspace.setTasks(tasks);
         System.out.println("Subtask '" + title + "' created.");
+        AuditSingleton.getInstance().addActionToFile("create subtask");
     }
 
     public void listSubtasks(String workspaceTitle, String parentTaskTitle) {
@@ -329,6 +345,7 @@ public class Services {
                 System.out.println(task.getTitle());
             }
         }
+        AuditSingleton.getInstance().addActionToFile("list subtasks");
     }
 
 }
