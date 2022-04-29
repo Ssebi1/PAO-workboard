@@ -2,23 +2,24 @@ package csv.readWriteSingletons;
 
 import auth.User;
 import workspace.Workspace;
+import workspace.task.Subtask;
 import workspace.task.Task;
 
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TasksReadWriteSingleton {
-    private static TasksReadWriteSingleton instance = null;
+public class SubtasksReadWriteSingleton {
+    private static SubtasksReadWriteSingleton instance = null;
     private final String fileName;
 
-    private TasksReadWriteSingleton(String fileName) {
+    private SubtasksReadWriteSingleton(String fileName) {
         this.fileName = fileName;
     }
 
-    public static TasksReadWriteSingleton getInstance() {
+    public static SubtasksReadWriteSingleton getInstance() {
         if (instance == null)
-            instance = new TasksReadWriteSingleton("src/csv/data/tasks.csv");
+            instance = new SubtasksReadWriteSingleton("src/csv/data/subtasks.csv");
 
         return instance;
     }
@@ -32,17 +33,7 @@ public class TasksReadWriteSingleton {
                 if (line.length() > 1) {
                     String[] fields = line.replaceAll(" ", "").split(",");
                     if (Integer.parseInt(fields[0]) == userId && Integer.parseInt(fields[1]) == workspaceId) {
-                        list.add(new Task(Integer.parseInt(fields[2]), fields[3]) {
-                            @Override
-                            public Integer getParentTaskId() {
-                                return null;
-                            }
-
-                            @Override
-                            public void setParentTaskId(Integer parentTaskId) {
-
-                            }
-                        });
+                        list.add(new Subtask(Integer.parseInt(fields[3]), Integer.parseInt(fields[2]), fields[4]));
                     }
                 }
             }
@@ -61,8 +52,8 @@ public class TasksReadWriteSingleton {
             for (User user : users) {
                 for (Workspace workspace : user.getWorkspaces()) {
                     for (Task task : workspace.getTasks()) {
-                        if(task.getParentTaskId() == null) {
-                            data.append(user.getId()).append(',').append(workspace.getId()).append(',').append(task.getId()).append(',').append(task.getTitle()).append('\n');
+                        if(task.getParentTaskId() != null) {
+                            data.append(user.getId()).append(',').append(workspace.getId()).append(',').append(task.getId()).append(',').append(task.getParentTaskId()).append(',').append(task.getTitle()).append('\n');
                         }
                     }
                 }

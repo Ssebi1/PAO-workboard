@@ -255,7 +255,7 @@ public class Services {
         }
 
         for (Task task : workspace.getTasks()) {
-            if(task.getClass().getName().equals("Task")) {
+            if(task.getParentTaskId() == null) {
                 System.out.println(task.getTitle());
             }
         }

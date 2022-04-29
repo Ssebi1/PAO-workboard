@@ -3,13 +3,16 @@ package main;
 import auth.User;
 import console.Outputs;
 import csv.audit.AuditSingleton;
+import csv.readWriteSingletons.SubtasksReadWriteSingleton;
 import csv.readWriteSingletons.TasksReadWriteSingleton;
 import csv.readWriteSingletons.UsersReadWriteSingleton;
 import csv.readWriteSingletons.WorkspacesReadWriteSingleton;
 import data.Data;
 import services.Services;
 import workspace.Workspace;
+import workspace.task.Task;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -23,6 +26,9 @@ public class Main {
             user.setWorkspaces(WorkspacesReadWriteSingleton.getInstance().readDataFromFile(user.getId()));
             for (Workspace workspace : user.getWorkspaces()) {
                 workspace.setTasks(TasksReadWriteSingleton.getInstance().readDataFromFile(user.getId(), workspace.getId()));
+                List<Task> tasks = workspace.getTasks();
+                tasks.addAll(SubtasksReadWriteSingleton.getInstance().readDataFromFile(user.getId(), workspace.getId()));
+                workspace.setTasks(tasks);
             }
         }
         AuditSingleton.getInstance().addActionToFile("\nstart program");
@@ -57,6 +63,7 @@ public class Main {
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         TasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
+                        SubtasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
@@ -127,6 +134,7 @@ public class Main {
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         TasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
+                        SubtasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
