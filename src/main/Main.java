@@ -3,10 +3,12 @@ package main;
 import auth.User;
 import console.Outputs;
 import csv.audit.AuditSingleton;
+import csv.readWriteSingletons.TasksReadWriteSingleton;
 import csv.readWriteSingletons.UsersReadWriteSingleton;
 import csv.readWriteSingletons.WorkspacesReadWriteSingleton;
 import data.Data;
 import services.Services;
+import workspace.Workspace;
 
 import java.util.Scanner;
 
@@ -19,6 +21,9 @@ public class Main {
         data.setUsers(UsersReadWriteSingleton.getInstance().readDataFromFile());
         for (User user : data.getUsers()) {
             user.setWorkspaces(WorkspacesReadWriteSingleton.getInstance().readDataFromFile(user.getId()));
+            for (Workspace workspace : user.getWorkspaces()) {
+                workspace.setTasks(TasksReadWriteSingleton.getInstance().readDataFromFile(user.getId(), workspace.getId()));
+            }
         }
         AuditSingleton.getInstance().addActionToFile("\nstart program");
 
@@ -51,6 +56,7 @@ public class Main {
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
+                        TasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
@@ -120,6 +126,7 @@ public class Main {
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
+                        TasksReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
