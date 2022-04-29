@@ -1,8 +1,10 @@
 package main;
 
+import auth.User;
 import console.Outputs;
 import csv.audit.AuditSingleton;
 import csv.readWriteSingletons.UsersReadWriteSingleton;
+import csv.readWriteSingletons.WorkspacesReadWriteSingleton;
 import data.Data;
 import services.Services;
 
@@ -15,6 +17,9 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         data.setUsers(UsersReadWriteSingleton.getInstance().readDataFromFile());
+        for (User user : data.getUsers()) {
+            user.setWorkspaces(WorkspacesReadWriteSingleton.getInstance().readDataFromFile(user.getId()));
+        }
         AuditSingleton.getInstance().addActionToFile("\nstart program");
 
         while (true) {
@@ -45,6 +50,7 @@ public class Main {
                     default -> {
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
+                        WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
@@ -113,6 +119,7 @@ public class Main {
                     default -> {
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
+                        WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
                         return;
                     }
                 }
