@@ -8,15 +8,19 @@ import csv.readWriteSingletons.TasksReadWriteSingleton;
 import csv.readWriteSingletons.UsersReadWriteSingleton;
 import csv.readWriteSingletons.WorkspacesReadWriteSingleton;
 import data.Data;
+import database.JdbcSingleton;
 import services.Services;
 import workspace.Workspace;
 import workspace.task.Task;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+        JdbcSingleton.getInstance().start();
+
         Data data = new Data();
         Services services = new Services(data);
         Scanner scanner = new Scanner(System.in);
@@ -59,6 +63,7 @@ public class Main {
                         services.login(email, password);
                     }
                     default -> {
+                        JdbcSingleton.getInstance().stop();
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());
@@ -130,6 +135,7 @@ public class Main {
                         services.listSubtasks(workspace, task);
                     }
                     default -> {
+                        JdbcSingleton.getInstance().stop();
                         System.out.println("Bye!");
                         AuditSingleton.getInstance().addActionToFile("end program");
                         WorkspacesReadWriteSingleton.getInstance().writeDataToFile(data.getUsers());

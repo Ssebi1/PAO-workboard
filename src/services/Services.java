@@ -4,6 +4,7 @@ import auth.User;
 import csv.audit.AuditSingleton;
 import csv.readWriteSingletons.UsersReadWriteSingleton;
 import data.Data;
+import database.JdbcSingleton;
 import workspace.Workspace;
 import workspace.task.Subtask;
 import workspace.task.Task;
@@ -54,6 +55,7 @@ public class Services {
         }
         User newUser = new User(latestId + 1, email, username, password);
         data.addUser(newUser);
+        JdbcSingleton.getInstance().createUser(newUser);
         UsersReadWriteSingleton.getInstance().writeDataToFile(newUser);
         System.out.println("User created. Please log in.");
         AuditSingleton.getInstance().addActionToFile("register");
