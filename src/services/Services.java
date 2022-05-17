@@ -135,7 +135,7 @@ public class Services {
 //        List<Workspace> workspaces = user.getWorkspaces();
 //        workspaces.removeIf(workspace -> Objects.equals(workspace.getTitle(), title));
 //        user.setWorkspaces(workspaces);
-        if(JdbcSingleton.getInstance().getWorkspaceByTitle(title, data.getCurrentUserLogged()) == null) {
+        if (JdbcSingleton.getInstance().getWorkspaceByTitle(title, data.getCurrentUserLogged()) == null) {
             System.out.println("Workspace " + title + " not existing");
             return;
         }
@@ -151,11 +151,11 @@ public class Services {
             return;
         }
         Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(oldTitle, data.getCurrentUserLogged());
-        if(workspace == null) {
+        if (workspace == null) {
             System.out.println("Workspace " + oldTitle + " not existing");
             return;
         }
-        if(JdbcSingleton.getInstance().getWorkspaceByTitle(newTitle, data.getCurrentUserLogged()) == null) {
+        if (JdbcSingleton.getInstance().getWorkspaceByTitle(newTitle, data.getCurrentUserLogged()) == null) {
             workspace.setTitle(newTitle);
             JdbcSingleton.getInstance().updateWorkspace(workspace);
             System.out.println("Workspace title updated from '" + oldTitle + "' to '" + newTitle + "'");
@@ -167,189 +167,138 @@ public class Services {
     }
 
     public void createTask(String workspaceTitle, String title) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        Workspace workspace = null;
-        for (Workspace w : user.getWorkspaces()) {
-            if (Objects.equals(w.getTitle(), workspaceTitle)) {
-                workspace = w;
-            }
-        }
-
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(workspaceTitle, data.getCurrentUserLogged());
         if (workspace == null) {
             System.out.println("This workspace does not exist");
             return;
         }
 
-        Integer latestId = 0;
-        for (Task task : workspace.getTasks()) {
-            if (Objects.equals(task.getTitle(), title)) {
-                System.out.println("This task already exists");
-                return;
-            }
-            if (latestId < task.getId()) {
-                latestId = task.getId();
-            }
+        if (JdbcSingleton.getInstance().getTaskByTitle(title, workspace.getId()) != null) {
+            System.out.println("This task already exists");
+            return;
         }
 
-        List<Task> tasks = workspace.getTasks();
-        tasks.add(new Task(latestId + 1, title) {
-            @Override
-            public Integer getParentTaskId() {
-                return null;
-            }
+//        List<Task> tasks = workspace.getTasks();
+//        tasks.add(new Task(latestId + 1, title) {
+//            @Override
+//            public Integer getParentTaskId() {
+//                return null;
+//            }
+//
+//            @Override
+//            public void setParentTaskId(Integer parentTaskId) {
+//
+//            }
+//        });
+//        workspace.setTasks(tasks);
 
-            @Override
-            public void setParentTaskId(Integer parentTaskId) {
-
-            }
-        });
-        workspace.setTasks(tasks);
+        Subtask newTask = new Subtask(null, 0, title);
+        JdbcSingleton.getInstance().createTask(newTask, workspace.getId());
         System.out.println("Task '" + title + "' created.");
         AuditSingleton.getInstance().addActionToFile("create task");
     }
 
     public void deleteTask(String workspaceTitle, String title) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        Workspace workspace = null;
-        for (Workspace w : user.getWorkspaces()) {
-            if (Objects.equals(w.getTitle(), workspaceTitle)) {
-                workspace = w;
-            }
-        }
-
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(workspaceTitle, data.getCurrentUserLogged());
         if (workspace == null) {
             System.out.println("This workspace does not exist");
             return;
         }
 
-        List<Task> tasks = workspace.getTasks();
-        tasks.removeIf(task -> Objects.equals(task.getTitle(), title));
-        workspace.setTasks(tasks);
+        Task taskToDelete= JdbcSingleton.getInstance().getTaskByTitle(title, workspace.getId());
+        if(taskToDelete == null) {
+            System.out.println("This task does not exist");
+            return;
+        }
+
+//        List<Task> tasks = workspace.getTasks();
+//        tasks.removeIf(task -> Objects.equals(task.getTitle(), title));
+//        workspace.setTasks(tasks);
+        JdbcSingleton.getInstance().deleteTask(taskToDelete, workspace.getId());
         System.out.println("Task '" + title + "' deleted.");
         AuditSingleton.getInstance().addActionToFile("delete task");
     }
 
     public void listTasks(String workspaceTitle) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        Workspace workspace = null;
-        for (Workspace w : user.getWorkspaces()) {
-            if (Objects.equals(w.getTitle(), workspaceTitle)) {
-                workspace = w;
-            }
-        }
-
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(workspaceTitle, data.getCurrentUserLogged());
         if (workspace == null) {
             System.out.println("This workspace does not exist");
             return;
         }
 
-        for (Task task : workspace.getTasks()) {
-            if(task.getParentTaskId() == null) {
-                System.out.println(task.getTitle());
-            }
+        for (Task task : JdbcSingleton.getInstance().getTasks(workspace.getId())) {
+            System.out.println(task.getTitle());
         }
         AuditSingleton.getInstance().addActionToFile("list tasks");
     }
 
     public void createSubtask(String workspaceTitle, String parentTaskTitle, String title) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        Workspace workspace = null;
-        for (Workspace w : user.getWorkspaces()) {
-            if (Objects.equals(w.getTitle(), workspaceTitle)) {
-                workspace = w;
-            }
-        }
-
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(workspaceTitle, data.getCurrentUserLogged());
         if (workspace == null) {
             System.out.println("This workspace does not exist");
             return;
         }
 
-        Integer latestId = 0;
-        Integer parentTaskId = -1;
-        for (Task task : workspace.getTasks()) {
-            if (Objects.equals(task.getTitle(), title)) {
-                System.out.println("This subtask already exists");
-                return;
-            }
-            if (latestId < task.getId()) {
-                latestId = task.getId();
-            }
-            if (Objects.equals(task.getTitle(), parentTaskTitle)) {
-                parentTaskId = task.getId();
-            }
-        }
-
-        if (parentTaskId == -1) {
+        Integer parentTaskId = JdbcSingleton.getInstance().getTaskByTitle(parentTaskTitle, workspace.getId()).getId();
+        if (parentTaskId == null) {
             System.out.println("Parent task does not exist.");
             return;
         }
 
-        List<Task> tasks = workspace.getTasks();
-        tasks.add(new Subtask(parentTaskId, latestId + 1, title));
-        workspace.setTasks(tasks);
+        if (JdbcSingleton.getInstance().getSubtaskByTitle(title, workspace.getId(), parentTaskId) != null) {
+            System.out.println("This subtask already exists");
+            return;
+        }
+
+//        List<Task> tasks = workspace.getTasks();
+//        tasks.add(new Subtask(parentTaskId, latestId + 1, title));
+//        workspace.setTasks(tasks);
+        JdbcSingleton.getInstance().createSubtask(new Subtask(parentTaskId, 0, title), workspace.getId());
         System.out.println("Subtask '" + title + "' created.");
         AuditSingleton.getInstance().addActionToFile("create subtask");
     }
 
     public void listSubtasks(String workspaceTitle, String parentTaskTitle) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        Workspace workspace = null;
-        for (Workspace w : user.getWorkspaces()) {
-            if (Objects.equals(w.getTitle(), workspaceTitle)) {
-                workspace = w;
-            }
-        }
-
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(workspaceTitle, data.getCurrentUserLogged());
         if (workspace == null) {
             System.out.println("This workspace does not exist");
             return;
         }
 
-        Integer latestId = 0;
-        Integer parentTaskId = -1;
-        for (Task task : workspace.getTasks()) {
-            if (Objects.equals(task.getTitle(), parentTaskTitle)) {
-                parentTaskId = task.getId();
-            }
-        }
-
-        if (parentTaskId == -1) {
+        Integer parentTaskId = JdbcSingleton.getInstance().getTaskByTitle(parentTaskTitle, workspace.getId()).getId();
+        if (parentTaskId == null) {
             System.out.println("Parent task does not exist.");
             return;
         }
 
-        for (Task task : workspace.getTasks()) {
-            if (Objects.equals(task.getParentTaskId(), parentTaskId)) {
-                System.out.println(task.getTitle());
-            }
+        for (Task task : JdbcSingleton.getInstance().getSubtasks(workspace.getId(), parentTaskId)) {
+            System.out.println(task.getTitle());
         }
         AuditSingleton.getInstance().addActionToFile("list subtasks");
     }
-
 }

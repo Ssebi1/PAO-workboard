@@ -241,3 +241,68 @@ rename workspace,17-05-2022 19:08:56
 start program,17-05-2022 19:10:38
 login,17-05-2022 19:10:42
 list workspaces,17-05-2022 19:10:43
+
+start program,17-05-2022 21:01:59
+login,17-05-2022 21:02:03
+account info,17-05-2022 21:02:06
+logout,17-05-2022 21:02:08
+login,17-05-2022 21:02:12
+
+start program,17-05-2022 21:03:32
+login,17-05-2022 21:03:59
+account info,17-05-2022 21:04:02
+list tasks,17-05-2022 21:04:11
+
+start program,17-05-2022 21:04:48
+login,17-05-2022 21:04:51
+
+start program,17-05-2022 21:05:27
+login,17-05-2022 21:05:34
+create task,17-05-2022 21:05:47
+list tasks,17-05-2022 21:05:53
+create task,17-05-2022 21:06:23
+
+start program,17-05-2022 21:07:04
+login,17-05-2022 21:07:13
+create task,17-05-2022 21:07:21
+list tasks,17-05-2022 21:07:51
+
+start program,17-05-2022 21:08:46
+login,17-05-2022 21:08:49
+list tasks,17-05-2022 21:08:54
+
+start program,17-05-2022 21:09:16
+login,17-05-2022 21:09:20
+list tasks,17-05-2022 21:09:26
+
+start program,17-05-2022 21:09:51
+login,17-05-2022 21:09:55
+create task,17-05-2022 21:10:02
+list tasks,17-05-2022 21:10:08
+list tasks,17-05-2022 21:10:14
+
+start program,17-05-2022 21:29:06
+login,17-05-2022 21:29:10
+create subtask,17-05-2022 21:29:25
+end program,17-05-2022 21:29:30
+
+start program,17-05-2022 21:29:37
+login,17-05-2022 21:29:41
+create subtask,17-05-2022 21:30:04
+
+start program,17-05-2022 21:32:59
+login,17-05-2022 21:33:04
+list tasks,17-05-2022 21:33:11
+create task,17-05-2022 21:33:28
+list tasks,17-05-2022 21:33:35
+create task,17-05-2022 21:33:51
+create subtask,17-05-2022 21:34:04
+
+start program,17-05-2022 21:34:47
+login,17-05-2022 21:34:55
+create subtask,17-05-2022 21:35:06
+list subtasks,17-05-2022 21:35:32
+
+start program,17-05-2022 21:36:19
+login,17-05-2022 21:36:24
+list subtasks,17-05-2022 21:36:39

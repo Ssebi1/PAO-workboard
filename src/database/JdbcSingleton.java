@@ -2,6 +2,8 @@ package database;
 
 import auth.User;
 import workspace.Workspace;
+import workspace.task.Subtask;
+import workspace.task.Task;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -229,6 +231,224 @@ public class JdbcSingleton {
                 String title = result.getString("title");
 
                 return new Workspace(id, title);
+            }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Subtasks CRUD
+    public void createSubtask(Subtask subtask, int workspace_id) {
+        try {
+            String query = "insert into task values(?,?,?,NULL,?,?);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, subtask.getId());
+            preparedStatement.setString(2, subtask.getTitle());
+            preparedStatement.setDate(3, (Date) subtask.getDueDate());
+            preparedStatement.setInt(4, subtask.getParentTaskId());
+            preparedStatement.setInt(5, workspace_id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteSubtask(Subtask subtask, int workspace_id) {
+        try {
+            String query = "DELETE FROM task WHERE id = " + subtask.getId() + " AND workspace_id = " + workspace_id + " AND parent_task_id IS NOT NULL";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateSubtask(Subtask subtask, int workspace_id) {
+        try  {
+            String query = "UPDATE task SET title = ?, date = ?, status_id = ? WHERE id = ?  AND workspace_id = ? AND parent_task_id = ?;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, subtask.getTitle());
+            preparedStatement.setDate(2, (Date) subtask.getDueDate());
+            preparedStatement.setInt(3, subtask.getStatus().getId());
+            preparedStatement.setInt(4, subtask.getId());
+            preparedStatement.setInt(5, subtask.getParentTaskId());
+            preparedStatement.setInt(5, workspace_id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Subtask> getSubtasks(int workspace_id, int parent_task_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE workspace_id = " + workspace_id + " AND parent_task_id = " + parent_task_id + ";";
+
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+            List<Subtask> subtasks = new ArrayList<>();
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                Subtask task = new Subtask(null, id, title);
+                subtasks.add(task);
+            }
+            return subtasks;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Subtask getSubtaskById(int subtask_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE id = " + subtask_id + " AND parent_task_id IS NOT NULL" + ";";
+
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                return new Subtask(null, id, title);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Subtask getSubtaskByTitle(String subtask_title ,int workspace_id, int parent_task_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE title LIKE '" + subtask_title + "' AND workspace_id = " + workspace_id + " AND parent_task_id = " + parent_task_id + ";";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet result = preparedStatement.executeQuery(sql);
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                return new Subtask(null, id, title);
+            }
+            return null;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // Task CRUD
+    public void createTask(Task task, int workspace_id) {
+        try {
+            String query = "insert into task values(?,?,?,NULL,NULL,?);";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setInt(1, task.getId());
+            preparedStatement.setString(2, task.getTitle());
+            preparedStatement.setDate(3, (Date) task.getDueDate());
+            preparedStatement.setInt(4, workspace_id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteTask(Task task, int workspace_id) {
+        try {
+            String query = "DELETE FROM task WHERE id = " + task.getId() + " AND workspace_id = " + workspace_id + " AND parent_task_id IS NULL";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void updateTask(Task task, int workspace_id) {
+        try  {
+            String query = "UPDATE task SET title = ?, date = ?, status_id = ? WHERE id = ?  AND workspace_id = ? AND parent_task_id = NULL;";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(query);
+
+            preparedStatement.setString(1, task.getTitle());
+            preparedStatement.setDate(2, (Date) task.getDueDate());
+            preparedStatement.setInt(3, task.getStatus().getId());
+            preparedStatement.setInt(4, task.getId());
+            preparedStatement.setInt(5, workspace_id);
+
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public List<Task> getTasks(int workspace_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE workspace_id = " + workspace_id + " AND parent_task_id IS NULL" + ";";
+
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+            List<Task> tasks = new ArrayList<>();
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                Subtask task = new Subtask(null, id, title);
+                tasks.add(task);
+            }
+            return tasks;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Task getTaskById(int task_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE id = " + task_id + " AND parent_task_id IS NULL" + ";";
+
+            Statement statement = connection.createStatement();
+            ResultSet result = statement.executeQuery(sql);
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                return new Subtask(null, id, title);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Task getTaskByTitle(String task_title ,int workspace_id) {
+        try {
+            String sql = "SELECT * FROM task WHERE title LIKE '" + task_title + "' AND workspace_id = " + workspace_id + " AND parent_task_id IS NULL" + ";";
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            ResultSet result = preparedStatement.executeQuery(sql);
+
+            while (result.next()){
+                int id = result.getInt("id");
+                String title = result.getString("title");
+
+                return new Subtask(null, id, title);
             }
             return null;
         } catch (SQLException e) {
