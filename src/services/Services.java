@@ -25,7 +25,7 @@ public class Services {
             return;
         }
 
-        for (User user : data.getUsers()) {
+        for (User user : JdbcSingleton.getInstance().getUsers()) {
             if (Objects.equals(user.getEmail(), email) && Objects.equals(user.getPassword(), password)) {
                 data.setCurrentUserLogged(user.getId());
                 System.out.println("Logged in succesfully.");
@@ -44,7 +44,7 @@ public class Services {
         }
 
         Integer latestId = 0;
-        for (User user : data.getUsers()) {
+        for (User user : JdbcSingleton.getInstance().getUsers()) {
             if (Objects.equals(user.getEmail(), email)) {
                 System.out.println("There's already a user with this email.");
                 return;
@@ -54,7 +54,7 @@ public class Services {
             }
         }
         User newUser = new User(latestId + 1, email, username, password);
-        data.addUser(newUser);
+//        data.addUser(newUser);
         JdbcSingleton.getInstance().createUser(newUser);
         UsersReadWriteSingleton.getInstance().writeDataToFile(newUser);
         System.out.println("User created. Please log in.");
@@ -77,24 +77,23 @@ public class Services {
             return;
         }
 
-        for (User user : data.getUsers()) {
-            if (Objects.equals(user.getId(), data.getCurrentUserLogged())) {
-                System.out.println("Logged in as " + user.getUsername() + " with the email " + user.getEmail());
-                AuditSingleton.getInstance().addActionToFile("account info");
-                return;
-            }
+        User user = JdbcSingleton.getInstance().getUser(data.getCurrentUserLogged());
+        if (user != null) {
+            System.out.println("Logged in as " + user.getUsername() + " with the email " + user.getEmail());
+            AuditSingleton.getInstance().addActionToFile("account info");
+            return;
         }
         System.out.println("An error occured. Please contact an administrator.");
     }
 
     public void createWorkspace(String title) {
-        User user = data.getCurrentUserLoggedObject();
+        User user = JdbcSingleton.getInstance().getUser(data.getCurrentUserLogged());
         if (user == null) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        List<Workspace> workspaces = user.getWorkspaces();
+        List<Workspace> workspaces = JdbcSingleton.getInstance().getWorkspaces(user.getId());
         Integer latestId = -1;
         for (Workspace workspace : workspaces) {
             if (Objects.equals(workspace.getTitle(), title)) {
@@ -107,60 +106,63 @@ public class Services {
             }
         }
 
-        workspaces.add(new Workspace(latestId + 1, title));
-        user.setWorkspaces(workspaces);
-        data.updateCurrentLoggedUser(user);
+        JdbcSingleton.getInstance().createWorkspace(new Workspace(latestId + 1, title), user.getId());
+//        workspaces.add(new Workspace(latestId + 1, title));
+//        user.setWorkspaces(workspaces);
+//        data.updateCurrentLoggedUser(user);
         System.out.println("Workspace " + title + " created.");
         AuditSingleton.getInstance().addActionToFile("create workspace");
     }
 
     public void listWorkspaces() {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        for (Workspace workspace : user.getWorkspaces()) {
-            System.out.println("workspace-" + workspace.getTitle());
+        for (Workspace workspace : JdbcSingleton.getInstance().getWorkspaces(data.getCurrentUserLogged())) {
+            System.out.println(workspace.getTitle());
         }
         AuditSingleton.getInstance().addActionToFile("list workspaces");
     }
 
     public void deleteWorkspace(String title) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
 
-        List<Workspace> workspaces = user.getWorkspaces();
-        workspaces.removeIf(workspace -> Objects.equals(workspace.getTitle(), title));
-        user.setWorkspaces(workspaces);
+//        List<Workspace> workspaces = user.getWorkspaces();
+//        workspaces.removeIf(workspace -> Objects.equals(workspace.getTitle(), title));
+//        user.setWorkspaces(workspaces);
+        if(JdbcSingleton.getInstance().getWorkspaceByTitle(title, data.getCurrentUserLogged()) == null) {
+            System.out.println("Workspace " + title + " not existing");
+            return;
+        }
+        JdbcSingleton.getInstance().deleteWorkspace(JdbcSingleton.getInstance().getWorkspaceByTitle(title, data.getCurrentUserLogged()));
+
         System.out.println("Workspace deleted.");
         AuditSingleton.getInstance().addActionToFile("delete workspace");
     }
 
     public void renameWorkspace(String oldTitle, String newTitle) {
-        User user = data.getCurrentUserLoggedObject();
-        if (user == null) {
+        if (data.getCurrentUserLogged() == -1) {
             System.out.println("You have to be logged in");
             return;
         }
-
-        List<Workspace> workspaces = user.getWorkspaces();
-        for (Workspace workspace : workspaces) {
-            if (Objects.equals(workspace.getTitle(), oldTitle)) {
-                for (Workspace w : workspaces) {
-                    if (Objects.equals(w.getTitle(), newTitle)) {
-                        System.out.println("There's already a workspace with this name");
-                        return;
-                    }
-                }
-                workspace.setTitle(newTitle);
-                System.out.println("Workspace title updated from '" + oldTitle + "' to '" + newTitle + "'");
-                AuditSingleton.getInstance().addActionToFile("rename workspace");
-            }
+        Workspace workspace = JdbcSingleton.getInstance().getWorkspaceByTitle(oldTitle, data.getCurrentUserLogged());
+        if(workspace == null) {
+            System.out.println("Workspace " + oldTitle + " not existing");
+            return;
+        }
+        if(JdbcSingleton.getInstance().getWorkspaceByTitle(newTitle, data.getCurrentUserLogged()) == null) {
+            workspace.setTitle(newTitle);
+            JdbcSingleton.getInstance().updateWorkspace(workspace);
+            System.out.println("Workspace title updated from '" + oldTitle + "' to '" + newTitle + "'");
+            AuditSingleton.getInstance().addActionToFile("rename workspace");
+        } else {
+            System.out.println("There's already a workspace with this name");
+            return;
         }
     }
 

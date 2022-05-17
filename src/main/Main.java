@@ -102,7 +102,7 @@ public class Main {
                     case 6 -> {
                         System.out.println("Enter the name of the workspace that will be renamed: ");
                         workspace = scanner.nextLine();
-                        System.out.println("Enter the name of the workspace that will be renamed: ");
+                        System.out.println("Enter the new name of worspace: ");
                         String newWorkspace = scanner.nextLine();
                         services.renameWorkspace(workspace, newWorkspace);
                     }
